@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.cqupt.software7.mapper.UserMapper">
+
+
+
+
+    <resultMap id="BaseResultMap" type="com.edu.cqupt.software7.entity.User">
+
+        <id property="uid" column="uid" jdbcType="INTEGER"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="role" column="role" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="userStatus" column="user_status" jdbcType="VARCHAR"/>
+        <result property="answer_1" column="answer_1" jdbcType="VARCHAR"/>
+        <result property="answer_2" column="answer_2" jdbcType="VARCHAR"/>
+        <result property="answer_3" column="answer_3" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        uid,username,
+        password,role,create_time,
+        update_time,
+        user_status,answer_1,answer_2,answer_3
+    </sql>
+
+    <select id="queryByUername" resultMap="BaseResultMap">
+        SELECT * FROM user_management WHERE username = #{username};
+    </select>
+
+    <select id="selectByUid" resultMap="BaseResultMap">
+        select * from user_management where uid = #{uid}
+    </select>
+
+
+    <!-- 用户管理新增-->
+    <insert id="saveUser" parameterType="com.edu.cqupt.software7.entity.User">
+        INSERT INTO user_management (username", "password", "create_time","update_time", "role", "user_status", "answer_1" , "answer_2", "answer_3" , "upload_size" ,"all_size")
+        VALUES ('${user.username}', '${user.password}', '${user.createTime}','${user.updateTime}','${user.role}','${user.userStatus}','${user.answer_1}','${user.answer_2}','${user.answer_3}','${user.uploadSize}','${user.allSize}')
+    </insert>
+    <select id="selectUserPage" resultType="com.edu.cqupt.software7.entity.User">
+        SELECT * FROM user_management order by create_time DESC LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+    <select id="countUsers" resultType="int"> SELECT COUNT(*) FROM user_management </select>
+    <update id="updateStatusById">
+        update user_management set user_status = #{status} , role = #{role} , all_size = #{allSize} , upload_size = #{uploadSize}
+        where uid = #{uid}
+    </update>
+    <update id="removeUserById"> DELETE FROM user_management WHERE uid= #{uid} </update>
+
+    <update id="updatePwd"> update user_management set password = '${password}' where username = #{username} </update>
+
+    <update id="updateBynsoftware9ame">
+        UPDATE user_management
+        SET password = #{newpassword}
+        WHERE username = #{username}
+    </update>
+</mapper>

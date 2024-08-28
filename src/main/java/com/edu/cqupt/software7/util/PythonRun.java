@@ -12,7 +12,7 @@ import java.util.List;
 @Log4j2
 @Component
 public class PythonRun {
-    private String environment = "C:\\Users\\hp\\anaconda3\\python.exe";
+    private String environment = "C:\\DevelopmentTools\\anaconda3\\python.exe";
     private String root = null;
     private String cache = null;
     private boolean autoRemoveCache = true;

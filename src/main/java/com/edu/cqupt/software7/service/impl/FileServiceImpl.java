@@ -1,5 +1,6 @@
 package com.edu.cqupt.software7.service.impl;
 
+import com.edu.cqupt.software7.common.Result;
 import com.edu.cqupt.software7.service.FileService;
 import com.edu.cqupt.software7.service.TablesService;
 import com.edu.cqupt.software7.view.UploadResult;
@@ -34,16 +35,20 @@ public class FileServiceImpl implements FileService {
     private String dbPassword;
 
 
+
+
     @Override
     @Transactional
-    public UploadResult fileUpload(MultipartFile file, String newName, String disease) throws IOException {
+     public Result fileUpload(MultipartFile file) throws IOException {
         System.out.println(file.getOriginalFilename());
         if (!file.getOriginalFilename().endsWith(".csv")) {
             throw new IllegalArgumentException("Only CSV files are supported.");
         }
+        String fileName = file.getOriginalFilename();
 
+        System.out.println(fileName.substring(0, fileName.lastIndexOf(".")));
+        String tableName = fileName.substring(0, fileName.lastIndexOf("."));
 
-        String tableName = newName;
 
         List<String> tableHeaders;
         List<String[]> rows = new ArrayList<>(); // 存储处理后的数据行
@@ -107,6 +112,7 @@ public class FileServiceImpl implements FileService {
                         statement.executeUpdate();
 
                     } catch (SQLException e) {
+                        e.printStackTrace();
                         throw new RuntimeException("Failed to insert data into the database.", e);
                     }
                 }
@@ -122,10 +128,9 @@ public class FileServiceImpl implements FileService {
 
 //        return tableName;
         // 创建并返回UploadResult对象
-        UploadResult result = new UploadResult();
-        result.setTableName(tableName);
-        result.setTableHeaders(tableHeaders);
-        result.setCode(200);
+        Result result = new Result(200,"文件上传成功"); // TODO 第三个参数是一个对象
+
+        
 //        result.setRes(res);
         return result;
 
@@ -136,9 +141,9 @@ public class FileServiceImpl implements FileService {
         StringBuilder createTableQuery = new StringBuilder();
 //        createTableQuery.append("CREATE TABLE ").append(tableName).append(" (");
         createTableQuery.append("CREATE TABLE ");
-        createTableQuery.append("`"); // 添加反引号（`）开始包围列名
+        createTableQuery.append('"'); // 添加反引号（`）开始包围列名
         createTableQuery.append(tableName);
-        createTableQuery.append("`"); // 添加反引号（`）结束包围列名
+        createTableQuery.append('"'); // 添加反引号（`）结束包围列名
         createTableQuery.append(" (");
         for (int i = 0; i < tableHeaders.size(); i++) {
 
@@ -148,15 +153,15 @@ public class FileServiceImpl implements FileService {
 
 
             // 使用反引号包裹列名
-            createTableQuery.append("`").append(columnName).append("`").append(" ").append(columnType);
+            createTableQuery.append('"').append(columnName).append('"').append(" ").append(columnType);
 
             if (i < tableHeaders.size() - 1) {
                 createTableQuery.append(", ");
             }
         }
 
-        createTableQuery.append(")");
-
+        createTableQuery.append(");");
+        System.err.println(createTableQuery);
         try (PreparedStatement statement = connection.prepareStatement(createTableQuery.toString())) {
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -167,8 +172,8 @@ public class FileServiceImpl implements FileService {
     private String determineColumnType(String columnName, List<String[]> rows,List<String> tableHeaders) {
         // 判断数据是否为整数
         boolean isInt = true;
-        // 判断数据是否为浮点数
-        boolean isDouble = true;
+        // 判断数据是否为浮点数,pg数据库double类型为DOUBLE PRECISION
+        boolean isDOUBLE_PRECISION = true;
         // 判断数据是否为日期，这里假设日期格式为"yyyy-MM-dd"，你可以根据实际情况修改格式
         boolean isDate = true;
 
@@ -185,7 +190,7 @@ public class FileServiceImpl implements FileService {
             try {
                 Double.parseDouble(data);
             } catch (NumberFormatException e) {
-                isDouble = false;
+                isDOUBLE_PRECISION = false;
             }
 
             // 判断是否为日期
@@ -197,18 +202,18 @@ public class FileServiceImpl implements FileService {
             }
 
             // 如果有一行不符合整数、浮点数、或日期的格式，则退出循环
-            if (!isInt && !isDouble && !isDate) {
+            if (!isInt && !isDOUBLE_PRECISION && !isDate) {
                 break;
             }
         }
 
         // 根据判断结果返回对应的列类型
         if (isInt) {
-            return "INT";
-        } else if (isDouble) {
-            return "DOUBLE";
+            return "VARCHAR(255)";
+        } else if (isDOUBLE_PRECISION) {
+            return "VARCHAR(255)";
         } else if (isDate) {
-            return "DATE";
+            return "VARCHAR(255)";
         } else {
             // 如果以上条件都不满足，则返回默认的VARCHAR类型，长度为255
             return "VARCHAR(255)";
@@ -228,7 +233,7 @@ public class FileServiceImpl implements FileService {
         // 判断数据是否为浮点数
         try {
             Double.parseDouble(data);
-            return "DOUBLE"; // 如果是浮点数，返回DOUBLE类型
+            return "DOUBLE PRECISION"; // 如果是浮点数，返回DOUBLE类型,pg数据库double类型为DOUBLE PRECISION
         } catch (NumberFormatException e) {
             // 不是浮点数，继续判断其他类型
         }
@@ -250,15 +255,15 @@ public class FileServiceImpl implements FileService {
     private String generateInsertQuery(String tableName, String[] columnNames) {
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ");
-        sb.append("`"); // 添加反引号（`）开始包围列名
+        sb.append('"'); // 添加反引号（`）开始包围列名
         sb.append(tableName);
-        sb.append("`"); // 添加反引号（`）结束包围列名
+        sb.append('"'); // 添加反引号（`）结束包围列名
         sb.append(" (");
 
         for (int i = 0; i < columnNames.length; i++) {
-            sb.append("`"); // 添加反引号（`）开始包围列名
+            sb.append('"'); // 添加反引号（`）开始包围列名
             sb.append(columnNames[i]);
-            sb.append("`"); // 添加反引号（`）结束包围列名
+            sb.append('"'); // 添加反引号（`）结束包围列名
 
             if (i < columnNames.length - 1) {
                 sb.append(", ");

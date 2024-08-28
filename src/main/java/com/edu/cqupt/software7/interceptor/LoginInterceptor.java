@@ -43,7 +43,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         //UTF-8编码
         httpResponse.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=utf-8");
-        Result result = new Result(code,msg,"");
+        Result result = new Result(code,msg);
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(result);
         httpResponse.getWriter().print(json);

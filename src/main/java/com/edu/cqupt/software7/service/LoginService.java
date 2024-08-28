@@ -6,5 +6,5 @@ import com.edu.cqupt.software7.entity.User;
 import com.edu.cqupt.software7.view.LoginDTO;
 
 public interface LoginService extends IService<User> {
-    public Result login(LoginDTO loginDTO);
+//    public Result login(LoginDTO loginDTO);
 }

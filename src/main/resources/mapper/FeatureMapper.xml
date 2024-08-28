@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edu.cqupt.software7.mapper.FeatureManageMapper">
+    <insert id="batchInsertFeatures" parameterType="java.util.List">
+        insert into field_management (feature_name,ch_name,disease_standard,diagnosis,pathology,vital_signs,table_name,unit,is_label)
+        values
+        <!-- 遍历数据集合 -->
+            <foreach collection="featureEntities" item="feature"  separator=",">
+                (#{feature.featureName}, #{feature.chName}, #{feature.diseaseStandard}, #{feature.diagnosis}, #{feature.pathology}, #{feature.vitalSigns}, #{feature.tableName}, #{feature.unit}, #{feature.isLabel})
+            </foreach>
+    </insert>
+
+
+    <select id="selectFeatures" resultType="com.edu.cqupt.software7.entity.FeatureEntity">
+        select * from field_management where ${belongType}=true;
+    </select>
+
+<!--    <select id="getAllFeaturesByTableNamea" resultType="java.util.List">-->
+<!--        SELECT column_name-->
+<!--        FROM information_schema.columns-->
+<!--        WHERE table_name = '${tableName}';-->
+<!--    </select>-->
+    <select id="getAllFeaturesByTableName" resultType="java.lang.String">
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = '${tableName}';
+    </select>
+
+</mapper>
+

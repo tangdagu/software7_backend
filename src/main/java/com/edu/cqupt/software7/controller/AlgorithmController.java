@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/algorithm")
+@RequestMapping("/algorithm")
 public class AlgorithmController {
     @Resource
     AlgorithmService algorithmService;
@@ -26,20 +26,7 @@ public class AlgorithmController {
     private String filePath;
     @PostMapping("/update")
     public Boolean algorithmUpdate(@RequestBody Algorithm algorithm) throws IOException {
-        String fileName = algorithmService.getById(algorithm.getAlgorithmId()).getAlgorithmName();
-        if(!fileName.equals(algorithm.getAlgorithmName())){
-            File oldName = new File(filePath+fileName);
-            File newName = new File(filePath+algorithm.getAlgorithmName());
-            if (newName.exists()) {  //  确保新的文件名不存在
-                throw new java.io.IOException("file exists");
-            }
-            if(oldName.renameTo(newName)) {
-                System.out.println("已重命名");
-                algorithm.setAlgorithmDeployPath(filePath+algorithm.getAlgorithmName());
-            } else {
-                System.out.println("Error");
-            }
-        }
+
         return algorithmService.updateById(algorithm);
     }
     @PostMapping("/insert")
@@ -65,19 +52,8 @@ public class AlgorithmController {
     }
     @GetMapping("/delete/{algorithmId}")
     public Boolean algorithmDelete(@PathVariable int algorithmId){
-        String fileName = algorithmService.getById(algorithmId).getAlgorithmName();
-        try{
-            File file = new File(filePath+fileName);
-            if(file.delete()){
-                System.out.println(file.getName() + " 文件已被删除！");
-            }else{
-                System.out.println("文件删除失败！");
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
         QueryWrapper<Algorithm> queryWrapper  =new QueryWrapper<>();
-        queryWrapper.eq("id",algorithmId);
+        queryWrapper.eq("algorithm_id",algorithmId);
         return algorithmService.remove(queryWrapper);
     }
 
